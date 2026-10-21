@@ -1,33 +1,36 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { routes, Roles } from './routes'
+import { routes } from './routes'
 import { useAuthStore } from '@/stores/authStore'
 
-export const router = createRouter({
-  history: createWebHistory(),
-  routes
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
 })
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to) => {
   const authStore = useAuthStore()
-  const requiresAuth = to.meta.requiresAuth
-  const allowedRoles = to.meta.roles
 
-  if (!requiresAuth) {
-    return next()
+  if (authStore.isAuthenticated && !authStore.rutaInicio) {
+    authStore.salida()
   }
+
+  if (to.meta.soloInvitados && authStore.isAuthenticated) {
+    return authStore.rutaInicio
+  }
+
+  if (!to.meta.requiresAuth) return true
 
   if (!authStore.isAuthenticated) {
-    return next({ path: '/login', query: { redirect: to.fullPath } })
+    authStore.salida()
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
 
+  const allowedRoles = to.meta.roles
   if (allowedRoles && !authStore.tieneRol(allowedRoles)) {
-    if (authStore.rolUsuario === Roles.ASESOR) {
-      return next('/atencion')
-    }
-   else {
-      return next('/login')
-    }
+    return authStore.rutaInicio
   }
 
-  next()
+  return true
 })
+
+export default router

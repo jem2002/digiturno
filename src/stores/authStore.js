@@ -1,13 +1,17 @@
-import {defineStore} from 'pinia';
-import {ref, computed} from 'vue';
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { RUTA_INICIO_POR_ROL } from '@/constants/roles'
+import { tokenExpirado } from '@/utils/jwt'
+import { leerJson } from '@/utils/storage'
 
-export const useAuthstore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('token') || null);
-  const usuario = ref(JSON.parse(localStorage.getItem('user') || null));
+export const useAuthStore = defineStore('auth', () => {
+  const token = ref(localStorage.getItem('token'))
+  const usuario = ref(leerJson('user'))
 
-  const isAuthenticated = computed(() => !!token.value);
-  const rolUsuario = computed(() => usuario.value?.rol || null); // rol de donde viene la base de datos
-  const usuarioSedeId = computed(() => usuario.value?.sede_id || null); // lo mismo aca
+  const isAuthenticated = computed(() => !!token.value && !tokenExpirado(token.value))
+  const rolUsuario = computed(() => usuario.value?.rol ?? null)
+  const usuarioSedeId = computed(() => usuario.value?.sede_id ?? null)
+  const rutaInicio = computed(() => RUTA_INICIO_POR_ROL[rolUsuario.value] ?? null)
 
   function login(userData, jwtToken) {
     usuario.value = userData
@@ -23,9 +27,9 @@ export const useAuthstore = defineStore('auth', () => {
     localStorage.removeItem('user')
   }
 
-  function tieneRol(allowedRoles){
+  function tieneRol(allowedRoles) {
     if (!usuario.value) return false
-    return allowedRoles.includes(usuario.value?.rol)
+    return allowedRoles.includes(usuario.value.rol)
   }
 
   return {
@@ -34,10 +38,9 @@ export const useAuthstore = defineStore('auth', () => {
     isAuthenticated,
     rolUsuario,
     usuarioSedeId,
+    rutaInicio,
     login,
     salida,
-    tieneRol
+    tieneRol,
   }
-
-
 })

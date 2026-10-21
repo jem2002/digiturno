@@ -1,50 +1,65 @@
-import AsesorLayout from "@/layouts/AsesorLayout.vue"
-import kioskoLayout from "@/layouts/KioskoLayout.vue"
-import AdminLayout from "@/layouts/AdminLayout.vue"
-
-export const Roles = {
-ADMIN: 'SUPER-ADMIN',
-ASESOR: 'ASESOR',
-}
+import { Roles } from '@/constants/roles'
 
 export const routes = [
+  { path: '/', redirect: '/login' },
+
   {
-    path: '/:sede/Kiosko',
-    component: () => import ('@/views/devices/VistaKiosko.vue'),
-    meta: {layout: 'KioskoLayout'}
-  },
-  {
-    path: '/:sede/TV',
-    component: () => import ('@/views/devices/VistaTV.vue'),
-    meta: {layout: 'KioskoLayout'}
-  },
-  {
-    path: '/agendar',
-    component: () => import ('@/views/devices/Agendamiento.vue'),
-    meta: {layout: 'KioskoLayout'}
+    path: '/:sede',
+    component: () => import('@/layouts/KioskoLayout.vue'),
+    children: [
+      {
+        path: 'kiosko',
+        name: 'kiosko',
+        component: () => import('@/views/devices/VistaKiosko.vue'),
+      },
+      { path: 'tv', name: 'tv', component: () => import('@/views/devices/VistaTV.vue') },
+      {
+        path: 'agendar',
+        name: 'agendar',
+        component: () => import('@/views/devices/Agendamiento.vue'),
+      },
+    ],
   },
 
   {
     path: '/login',
-    component: () => import ('@/views/auth/Login.vue'),
-    meta: {layout: 'KioskoLayout'}
+    name: 'login',
+    component: () => import('@/views/auth/Login.vue'),
+    meta: { soloInvitados: true },
   },
+
   {
     path: '/asesor',
-    component: () => import ('@/views/asesor/PanelAsesor.vue'),
-    meta: {
-      requiresAuth: true,
-      roles: [Roles.ADMIN, Roles.ASESOR],
-      layout: 'AsesorLayout'
-    }
+    component: () => import('@/layouts/AsesorLayout.vue'),
+    meta: { requiresAuth: true, roles: [Roles.ADMIN, Roles.ASESOR] },
+    children: [
+      { path: '', name: 'panel-asesor', component: () => import('@/views/asesor/PanelAsesor.vue') },
+    ],
   },
+
   {
     path: '/admin',
-    component: () => import ('@/views/admin/Sedes.vue'),
-    meta: {
-      requiresAuth: true,
-      roles: [Roles.ADMIN],
-      layout: 'AdminLayout'
-    }
+    component: () => import('@/layouts/AdminLayout.vue'),
+    meta: { requiresAuth: true, roles: [Roles.ADMIN] },
+    children: [
+      { path: '', redirect: { name: 'admin-sedes' } },
+      { path: 'sedes', name: 'admin-sedes', component: () => import('@/views/admin/Sedes.vue') },
+      {
+        path: 'servicios',
+        name: 'admin-servicios',
+        component: () => import('@/views/admin/Servicios.vue'),
+      },
+      {
+        path: 'estadisticas',
+        name: 'admin-estadisticas',
+        component: () => import('@/views/admin/Estadisticas.vue'),
+      },
+    ],
+  },
+
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'no-encontrado',
+    component: () => import('@/views/errors/NoEncontrado.vue'),
   },
 ]
