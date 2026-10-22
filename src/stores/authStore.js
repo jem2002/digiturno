@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { RUTA_INICIO_POR_ROL } from '@/constants/roles'
 import { tokenExpirado } from '@/utils/jwt'
-import { leerJson } from '@/utils/storage'
+import { leerJson, leerTexto, borrar } from '@/utils/storage'
 
 export const useAuthStore = defineStore('auth', () => {
-  const token = ref(localStorage.getItem('token'))
+  const token = ref(leerTexto('token'))
   const usuario = ref(leerJson('user'))
 
   const isAuthenticated = computed(() => !!token.value && !tokenExpirado(token.value))
@@ -13,18 +13,20 @@ export const useAuthStore = defineStore('auth', () => {
   const usuarioSedeId = computed(() => usuario.value?.sede_id ?? null)
   const rutaInicio = computed(() => RUTA_INICIO_POR_ROL[rolUsuario.value] ?? null)
 
-  function login(userData, jwtToken) {
+  function login(userData, jwtToken, recordar = true) {
+    salida()
     usuario.value = userData
     token.value = jwtToken
-    localStorage.setItem('token', jwtToken)
-    localStorage.setItem('user', JSON.stringify(userData))
+    const almacen = recordar ? localStorage : sessionStorage
+    almacen.setItem('token', jwtToken)
+    almacen.setItem('user', JSON.stringify(userData))
   }
 
   function salida() {
     usuario.value = null
     token.value = null
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
+    borrar('token')
+    borrar('user')
   }
 
   function tieneRol(allowedRoles) {

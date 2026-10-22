@@ -22,7 +22,7 @@ const menu = [
       </nav>
       <div class="usuario">
         <span>{{ user?.nombre }}</span>
-        <button type="button" @click="cerrarSesion">Cerrar sesión</button>
+        <button type="button" class="btn btn-sm" @click="cerrarSesion">Cerrar sesión</button>
       </div>
     </aside>
     <main class="contenido">

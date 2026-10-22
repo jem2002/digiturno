@@ -4,9 +4,10 @@ export const routes = [
   { path: '/', redirect: '/login' },
 
   {
-    path: '/:sede',
+    path: '/sede/:sede',
     component: () => import('@/layouts/KioskoLayout.vue'),
     children: [
+      { path: '', redirect: { name: 'kiosko' } },
       {
         path: 'kiosko',
         name: 'kiosko',

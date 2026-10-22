@@ -10,7 +10,7 @@ const { user, cerrarSesion } = useAuth()
       <strong>Digiturno · Asesor</strong>
       <div class="usuario">
         <span>{{ user?.nombre }}</span>
-        <button type="button" @click="cerrarSesion">Cerrar sesión</button>
+        <button type="button" class="btn btn-sm" @click="cerrarSesion">Cerrar sesión</button>
       </div>
     </header>
     <main class="contenido">

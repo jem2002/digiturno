@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { turnosApi } from '@/api/turnosApi'
-import { EstadoTurno, TipoTurno } from '@/constants/turnos'
+import { EstadoTurno } from '@/constants/turnos'
+import { compararTurnos } from '@/utils/turnos'
 
 const MAX_ULTIMOS_LLAMADOS = 5
 
@@ -13,13 +14,7 @@ export const useColaStore = defineStore('cola', () => {
   const error = ref(null)
 
   const enEspera = computed(() =>
-    turnos.value
-      .filter((t) => t.estado === EstadoTurno.EN_ESPERA)
-      .sort((a, b) => {
-        const pa = a.tipo === TipoTurno.PREFERENCIAL ? 0 : 1
-        const pb = b.tipo === TipoTurno.PREFERENCIAL ? 0 : 1
-        return pa - pb || new Date(a.creadoEn) - new Date(b.creadoEn)
-      }),
+    turnos.value.filter((t) => t.estado === EstadoTurno.EN_ESPERA).sort(compararTurnos),
   )
   const turnoActual = computed(() => ultimosLlamados.value[0] ?? null)
   const totalEnEspera = computed(() => enEspera.value.length)
